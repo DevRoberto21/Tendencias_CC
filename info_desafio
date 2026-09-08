@@ -1,0 +1,89 @@
+# Desafio Integrador HealthSearch — Motor de Busca Híbrido com BM25 e Busca Semântica Vetorial
+
+**INSTITUIÇÃO:** UNIPÊ — Centro Universitário de João Pessoa
+
+**DISCIPLINA:** Tendências em Ciência da Computação — Recuperação de Informação / Processamento de Linguagem Natural
+
+**PROFESSOR:** Me. Ricardo Roberto de Lima
+
+**PÚBLICO-ALVO:** Grupos de 2 a 3 alunos | **VALOR:** 1.0 Ponto Extra na Avaliação da Unidade II
+
+## 1\. Estudo de Caso (Contexto Prático)
+
+A **HealthTech Solutions** é uma startup de inteligência em saúde que desenvolveu um repositório central contendo protocolos de triagem médica, diretrizes clínicas e guias de emergência hospitalar. Atualmente, médicos e enfermeiros em plantões de pronto-socorro enfrentam dificuldades críticas ao pesquisar por diagnósticos e condutas terapêuticas:
+
+-   **A falha dos sistemas léxicos puros:** Ao buscarem por _"infarto"_ ou _"ataque cardíaco"_, motores tradicionais baseados apenas em termos exatos falham em recuperar diretrizes médicas registradas sob os termos técnicos formais, como _"síndrome coronariana aguda"_ ou _"isquemia miocárdica"_.
+-   **A falha dos sistemas semânticos puros:** Ao pesquisarem por códigos específicos de exames (ex: ECG-12D) ou dosagens médicas exatas (ex: AAS 100mg), buscas puramente vetoriais (embeddings) diluem a precisão e trazem trechos genéricos sobre exames cardíacos ou medicamentos gerais.
+
+Diante desse dilema real, a diretoria de tecnologia contratou sua equipe para projetar e construir o **HealthSearch** — um motor de busca inteligente e híbrido. O sistema deve combinar a precisão léxica do **Algoritmo Okapi BM25** com a inteligência contextual da **Busca Semântica Vetorial (Embeddings)** através do método **Reciprocal Rank Fusion (RRF)** em uma interface interativa em Streamlit.
+
+**🎯 Objetivo Central do Desafio:** Construir um protótipo operacional que demonstre visualmente como a Busca Híbrida resolve os pontos cego tanto do BM25 (léxico) quanto dos Embeddings (semântico), garantindo alta precisão para termos/códigos exatos e alta cobertura para sinônimos médicos.
+
+## 2\. Objetivos de Aprendizagem
+
+1.  Compreender e implementar a mecânica do algoritmo de ranking léxico **Okapi BM25**, calibrando dinamicamente os parâmetros de saturação de frequência ($k\_1$) e normalização por tamanho de documento ($b$).
+2.  Gerar e operar **Embeddings Densos (Busca Semântica)** para calcular a Similaridade de Cosseno entre a consulta e o corpus.
+3.  Implementar o algoritmo **Reciprocal Rank Fusion (RRF)** para unificar e reordenar rankings de fontes heterogêneas sem depender de normalização direta de scores.
+4.  Desenvolver um dashboard analítico interativo em **Streamlit** contendo sliders de calibração, diagnóstico em abas comparativas e métricas de desempenho da busca.
+
+## 3\. Regras e Entregáveis
+
+-   **Equipes:** Grupos de 2 a 3 alunos.
+-   **Entregáveis:**
+    1.  Um único arquivo em Python (healthsearch\_app.py) contendo o código completo em Streamlit.
+    2.  Um relatório técnico em PDF (máx. 2 páginas) descrevendo a arquitetura da solução, gráfico de comparação de ranks e divisão de tarefas da equipe.
+-   **Requisitos Técnicos:** O código deve ser estruturado em Python e utilizar as bibliotecas streamlit, pandas, rank\_bm25 e sentence-transformers (ou simulação vetorial documentada).
+
+## 4\. Especificações Técnicas e Fases do Projeto
+
+A aplicação Streamlit deve obrigatoriamente integrar as seguintes 4 fases técnicas:
+
+### Fase 1: Ingestão do Corpus Médico e Pré-processamento
+
+Implementar a tokenização e limpeza de texto (normalização para minúsculas, remoção de caracteres especiais e eliminação de stopwords em português).
+
+### Fase 2: Motor Léxico (BM25) com Parâmetros Interativos
+
+Permitir ao usuário ajustar dinamicamente na barra lateral (Sidebar):
+
+-   **Parâmetro $k\_1$ (Saturação de Frequência):** Slider variando de 0.0 a 3.0 (padrão: 1.2).
+-   **Parâmetro $b$ (Normalização pelo Comprimento):** Slider variando de 0.0 a 1.0 (padrão: 0.75).
+
+### Fase 3: Motor Semântico Vetorial
+
+Mapear cada documento e a consulta em um espaço vetorial para calcular a similaridade de cosseno (captura de sinônimos e contexto médico).
+
+### Fase 4: Algoritmo de Fusão RRF (Reciprocal Rank Fusion)
+
+Calcular o score unificado para cada documento através da fórmula matemática:
+
+Score\_RRF(D) = α \* \[ 1 / (k\_rrf + Rank\_BM25) \] + (1 - α) \* \[ 1 / (k\_rrf + Rank\_Semantico) \]
+
+Onde $\\alpha$ representa o peso balanceador entre $0.0$ e $1.0$, e $k\_{RRF} = 60$ é a constante de suavização de posição.
+
+## 5\. Base de Dados do Corpus Médico (Hardcode Obrigatório)
+
+A aplicação deve pré-carregar os seguintes 6 documentos técnicos de diretrizes médicas:
+
+| ID | Título da Diretriz | Conteúdo do Trecho Clínico |
+| --- | --- | --- |
+| Doc 1 | Protocolo Emergência ECG | Pacientes com dor precordial aguda e suspeita de síndrome coronariana devem realizar eletrocardiograma CÓD-ECG-12D em até 10 minutos. |
+| Doc 2 | Guia de Farmacologia Cardíaca | O uso imediato de ácido acetilsalicílico e antiagregantes plaquetários reduz a mortalidade no infarto agudo do miocárdio. |
+| Doc 3 | Diretriz de Hipertensão Arterial | A crise hipertensiva severa requer administração de anti-hipertensivos venosos e monitoramento contínuo da pressão arterial na UTI. |
+| Doc 4 | Manual de AVC Isquêmico | O acidente vascular cerebral isquêmico agudo deve ser tratado com trombolíticos venosos em até quatro horas e meia do início dos sintomas. |
+| Doc 5 | Protocolo de Reanimação RCR | Parada cardiorrespiratória em adultos exige compressões torácicas contínuas de alta qualidade e desfibrilação precoce no código azul. |
+| Doc 6 | Procedimentos de UTI Geral | Para diagnóstico do protocolo CÓD-ECG-12D em arritmias complexas, recomenda-se a monitorização cardíaca contínua por telemetria. |
+
+## 6\. Matriz de Avaliação e Critérios
+
+| Critério de Avaliação | Peso (%) | Descrição do Desempenho Esparado |
+| --- | --- | --- |
+| Implementação BM25 & Parâmetros | 25% | Correta aplicação do BM25 com sliders funcionais que re-calculam a saturação ($k_1$) e normalização ($b$). |
+| Busca Semântica Vetorial | 20% | Geração de embeddings e cálculo correto da similaridade de cosseno para sinônimos. |
+| Algoritmo Híbrido RRF | 25% | Implementação exata da fórmula de Reciprocal Rank Fusion ordenando corretamente os resultados combinados. |
+| Interface & Abas no Streamlit | 20% | UI intuitiva organizada em abas (Léxico, Semântico, Híbrido RRF e Matriz Comparativa). |
+| Qualidade do Código e Relatório | 10% | Organização modular do script Python, clareza do relatório técnico em PDF e trabalho em equipe. |
+
+## 7\. Desafio Bônus (Nota Extra)
+
+**Cross-Encoder Re-Ranking (+0.3 pontos):** Adicionar um checkbox na interface para aplicar uma camada de re-ranking baseada em modelo Cross-Encoder (ex: cross-encoder/ms-marco-MiniLM-L-6-v2) sobre os Top-3 candidatos recuperados pela busca híbrida RRF, comparando a variação da nota final de relevância.
